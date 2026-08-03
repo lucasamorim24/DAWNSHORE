@@ -1,0 +1,13 @@
+{
+  "$GMScript":"",
+  "%Name":"scr_grid_to_iso",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"scr_grid_to_iso",
+  "parent":{
+    "name":"Scripts",
+    "path":"folders/Scripts.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}
