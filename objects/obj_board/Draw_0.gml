@@ -3,6 +3,18 @@
 /// Desenha o tabuleiro 4x4 (secao 2) em losangos isometricos, sem sprites -
 /// so para validar a orientacao e a leitura visual da grade A1-D4.
 
+// Descobre qual quadrante esta sob o mouse neste frame e guarda para o obj_player
+// tambem consultar. Fica -1 quando o cursor esta fora do tabuleiro 4x4.
+var _mouse_grid = iso_to_grid(mouse_x, mouse_y, board_origin_x, board_origin_y);
+if (_mouse_grid.column_index >= 0 && _mouse_grid.column_index < BOARD_COLUMNS
+ && _mouse_grid.row_index    >= 0 && _mouse_grid.row_index    < BOARD_ROWS) {
+    hovered_column = _mouse_grid.column_index;
+    hovered_row    = _mouse_grid.row_index;
+} else {
+    hovered_column = -1;
+    hovered_row    = -1;
+}
+
 for (var _row_index = 0; _row_index < BOARD_ROWS; _row_index++) {
     for (var _column_index = 0; _column_index < BOARD_COLUMNS; _column_index++) {
         var _quadrante = quadrantes[_row_index][_column_index];
@@ -22,6 +34,13 @@ for (var _row_index = 0; _row_index < BOARD_ROWS; _row_index++) {
 
         // Cor alternada tipo tabuleiro de xadrez, so para facilitar a leitura dos quadrantes
         var _tile_color = ((_column_index + _row_index) % 2 == 0) ? c_ltgray : c_gray;
+
+        // Se este quadrante esta sob o mouse, pinta de verde para dar o feedback
+        // de "flutuando aqui" (bem mais facil de distinguir que o cinza clareado).
+        var _is_hovered = (_column_index == hovered_column && _row_index == hovered_row);
+        if (_is_hovered) {
+            _tile_color = c_lime;
+        }
 
         draw_primitive_begin(pr_trianglefan);
             draw_vertex_color(_top_x,    _top_y,    _tile_color, 1);

@@ -6,6 +6,12 @@
 board_origin_x = room_width / 2;
 board_origin_y = 120;
 
+// Quadrante atualmente sob o cursor do mouse (-1 = nenhum / fora do tabuleiro).
+// Recalculado a cada Draw e lido tambem pelo obj_player para saber quando ficar
+// translucido.
+hovered_column = -1;
+hovered_row    = -1;
+
 // Letras das colunas, secao 2: "colunas = letras, linhas = numeros" (estilo batalha naval)
 column_letters = ["A", "B", "C", "D"];
 

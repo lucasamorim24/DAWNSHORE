@@ -38,7 +38,47 @@ place_on_tile = function(_col, _row) {
     y = _iso.y + TILE_HEIGHT / 2; // centro do losango (topo + meia altura)
 };
 
-// Posiciona no quadrante inicial.
+/// Verdadeiro se (_col,_row) e um dos 4 quadrantes vizinhos em cruz (os amarelos),
+/// dentro dos limites do tabuleiro. Distancia de Manhattan == 1 = so os adjacentes.
+is_yellow_neighbor = function(_col, _row) {
+    return (abs(_col - column_index) + abs(_row - row_index)) == 1
+        && _col >= 0 && _col < BOARD_COLUMNS
+        && _row >= 0 && _row < BOARD_ROWS;
+};
+
+// --- Janela de acao (Movimentar / Pescar) ---
+// Abre quando o jogador clica num quadrante amarelo; some ao escolher uma opcao
+// ou clicar fora dela.
+menu_open       = false;
+menu_target_col = -1; // quadrante amarelo escolhido, alvo da acao
+menu_target_row = -1;
+
+// Geometria da janela (constantes de layout; posicao x/y definida abaixo, ja que
+// depende da origem do tabuleiro).
+menu_w       = 170;
+menu_pad     = 12;
+menu_title_h = 26;
+menu_btn_h   = 40;
+menu_btn_gap = 10;
+menu_h = menu_pad + menu_title_h + menu_btn_h + menu_btn_gap + menu_btn_h + menu_pad;
+menu_x = 0;
+menu_y = 0;
+
+/// Retangulo de um dos dois botoes da janela. 0 = Movimentar, 1 = Pescar.
+/// @returns {struct} { x1, y1, x2, y2 }
+menu_button_rect = function(_index) {
+    var _x1 = menu_x + menu_pad;
+    var _x2 = menu_x + menu_w - menu_pad;
+    var _y1 = menu_y + menu_pad + menu_title_h + _index * (menu_btn_h + menu_btn_gap);
+    var _y2 = _y1 + menu_btn_h;
+    return { x1: _x1, y1: _y1, x2: _x2, y2: _y2 };
+};
+
+// Posiciona no quadrante inicial e ancora a janela a direita do tabuleiro (para
+// fora dele: borda direita do board + margem).
 if (board != noone) {
     place_on_tile(column_index, row_index);
+
+    menu_x = board.board_origin_x + BOARD_COLUMNS * (TILE_WIDTH / 2) + 40;
+    menu_y = board.board_origin_y + 40;
 }
