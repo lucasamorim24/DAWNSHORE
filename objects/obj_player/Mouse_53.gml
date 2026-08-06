@@ -5,14 +5,19 @@
 if (board == noone) exit;
 
 // --- Janela de acao aberta: o clique interage com ela ---
+// A janela e um overlay na camada GUI, entao o teste de clique usa o mouse em
+// coordenadas de GUI (nao as coordenadas de mundo mouse_x/mouse_y).
 if (menu_open) {
+    var _gmx = device_mouse_x_to_gui(0);
+    var _gmy = device_mouse_y_to_gui(0);
+
     var _mv = menu_button_rect(0); // Movimentar
     var _pe = menu_button_rect(1); // Pescar
 
-    if (point_in_rectangle(mouse_x, mouse_y, _mv.x1, _mv.y1, _mv.x2, _mv.y2)) {
+    if (point_in_rectangle(_gmx, _gmy, _mv.x1, _mv.y1, _mv.x2, _mv.y2)) {
         // Movimentar: vai para o quadrante alvo e fecha a janela.
         place_on_tile(menu_target_col, menu_target_row);
-    } else if (point_in_rectangle(mouse_x, mouse_y, _pe.x1, _pe.y1, _pe.x2, _pe.y2)) {
+    } else if (point_in_rectangle(_gmx, _gmy, _pe.x1, _pe.y1, _pe.x2, _pe.y2)) {
         // Pescar: acao a implementar numa proxima etapa; por ora so fecha a janela.
     }
     // Qualquer clique (nos botoes ou fora) fecha a janela.

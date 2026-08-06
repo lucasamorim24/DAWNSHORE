@@ -38,12 +38,38 @@ place_on_tile = function(_col, _row) {
     y = _iso.y + TILE_HEIGHT / 2; // centro do losango (topo + meia altura)
 };
 
-/// Verdadeiro se (_col,_row) e um dos 4 quadrantes vizinhos em cruz (os amarelos),
-/// dentro dos limites do tabuleiro. Distancia de Manhattan == 1 = so os adjacentes.
+/// FONTE DE VERDADE dos quadrantes alcancaveis a partir da posicao atual (a
+/// "cruz": os 4 vizinhos ortogonais dentro do tabuleiro). Tanto o destaque
+/// amarelo (Draw) quanto a decisao do clique (Mouse) consomem esta funcao, entao
+/// mudar a regra de alcance aqui (ex: incluir diagonais, aumentar o raio) reflete
+/// em todo lugar de uma vez.
+/// @returns {array} lista de { column_index, row_index } validos
+get_reachable_tiles = function() {
+    var _offsets = [[-1, 0], [1, 0], [0, -1], [0, 1]]; // esquerda, direita, cima, baixo
+    var _tiles = [];
+
+    for (var _i = 0; _i < array_length(_offsets); _i++) {
+        var _col = column_index + _offsets[_i][0];
+        var _row = row_index    + _offsets[_i][1];
+
+        if (_col >= 0 && _col < BOARD_COLUMNS && _row >= 0 && _row < BOARD_ROWS) {
+            array_push(_tiles, { column_index: _col, row_index: _row });
+        }
+    }
+
+    return _tiles;
+};
+
+/// Verdadeiro se (_col,_row) e um dos quadrantes alcancaveis (os amarelos).
+/// Deriva de get_reachable_tiles para nao duplicar a regra da cruz.
 is_yellow_neighbor = function(_col, _row) {
-    return (abs(_col - column_index) + abs(_row - row_index)) == 1
-        && _col >= 0 && _col < BOARD_COLUMNS
-        && _row >= 0 && _row < BOARD_ROWS;
+    var _tiles = get_reachable_tiles();
+    for (var _i = 0; _i < array_length(_tiles); _i++) {
+        if (_tiles[_i].column_index == _col && _tiles[_i].row_index == _row) {
+            return true;
+        }
+    }
+    return false;
 };
 
 // --- Janela de acao (Movimentar / Pescar) ---
@@ -53,16 +79,21 @@ menu_open       = false;
 menu_target_col = -1; // quadrante amarelo escolhido, alvo da acao
 menu_target_row = -1;
 
-// Geometria da janela (constantes de layout; posicao x/y definida abaixo, ja que
-// depende da origem do tabuleiro).
-menu_w       = 170;
-menu_pad     = 12;
-menu_title_h = 26;
-menu_btn_h   = 40;
-menu_btn_gap = 10;
+// Geometria da janela, em pixels de GUI (= resolucao base). Compacta para caber
+// bem na tela baixa; some no centro por cima do jogo (overlay), estilo modal.
+menu_w       = 116;
+menu_pad     = 6;
+menu_title_h = 14;
+menu_btn_h   = 20;
+menu_btn_gap = 5;
 menu_h = menu_pad + menu_title_h + menu_btn_h + menu_btn_gap + menu_btn_h + menu_pad;
-menu_x = 0;
-menu_y = 0;
+
+// Overlay CENTRAL na camada GUI, centralizado na zona de jogo (por cima do
+// tabuleiro), nao na tela inteira - assim nao cai atras do painel direito nem das
+// faixas reservadas. Posicao em coordenadas de GUI.
+var _zone = game_play_zone();
+menu_x = (_zone.x1 + _zone.x2) / 2 - menu_w / 2;
+menu_y = (_zone.y1 + _zone.y2) / 2 - menu_h / 2;
 
 /// Retangulo de um dos dois botoes da janela. 0 = Movimentar, 1 = Pescar.
 /// @returns {struct} { x1, y1, x2, y2 }
@@ -74,11 +105,7 @@ menu_button_rect = function(_index) {
     return { x1: _x1, y1: _y1, x2: _x2, y2: _y2 };
 };
 
-// Posiciona no quadrante inicial e ancora a janela a direita do tabuleiro (para
-// fora dele: borda direita do board + margem).
+// Posiciona no quadrante inicial (A1).
 if (board != noone) {
     place_on_tile(column_index, row_index);
-
-    menu_x = board.board_origin_x + BOARD_COLUMNS * (TILE_WIDTH / 2) + 40;
-    menu_y = board.board_origin_y + 40;
 }

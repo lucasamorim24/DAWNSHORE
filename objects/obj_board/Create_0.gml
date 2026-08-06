@@ -2,9 +2,24 @@
 /// Cole este conteudo no evento Create de um objeto chamado "obj_board".
 /// Requer os scripts scr_board_config e scr_grid_to_iso no projeto.
 
-// Origem do tabuleiro na tela (vertice superior do quadrante A1)
-board_origin_x = room_width / 2;
-board_origin_y = 120;
+// Origem do tabuleiro na tela: vertice superior do quadrante A1.
+// O tabuleiro e um "diorama" compacto CENTRALIZADO na zona de jogo (o retangulo
+// central que sobra depois das faixas reservadas da HUD - ver game_play_zone em
+// scr_display_config). Assim ele nunca invade o topo (Mare/personagem), o painel
+// direito nem a base reservada, e se recentraliza sozinho se as faixas mudarem.
+var _zone = game_play_zone();
+
+// Horizontal: centro da zona de jogo. Como o grid e simetrico (4x4), o centro do
+// tabuleiro cai exatamente no meio da zona.
+board_origin_x = (_zone.x1 + _zone.x2) / 2;
+
+// Vertical: centraliza o CONTEUDO (losangos + a altura do cubo do jogador, que
+// sobe 1 tile acima do quadrante do fundo) dentro da zona. Alturas derivadas da
+// config do grid (fonte de verdade), entao mudam sozinhas com o tile/o board.
+var _cube_overhang = TILE_HEIGHT;
+var _board_span    = ((BOARD_COLUMNS - 1) + (BOARD_ROWS - 1)) * (TILE_HEIGHT / 2) + TILE_HEIGHT;
+var _content_h     = _cube_overhang + _board_span;
+board_origin_y = _zone.y1 + ((_zone.y2 - _zone.y1) - _content_h) / 2 + _cube_overhang;
 
 // Quadrante atualmente sob o cursor do mouse (-1 = nenhum / fora do tabuleiro).
 // Recalculado a cada Draw e lido tambem pelo obj_player para saber quando ficar

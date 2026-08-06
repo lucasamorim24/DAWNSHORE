@@ -3,18 +3,8 @@
 /// Desenha o tabuleiro 4x4 (secao 2) em losangos isometricos, sem sprites -
 /// so para validar a orientacao e a leitura visual da grade A1-D4.
 
-// Descobre qual quadrante esta sob o mouse neste frame e guarda para o obj_player
-// tambem consultar. Fica -1 quando o cursor esta fora do tabuleiro 4x4.
-var _mouse_grid = iso_to_grid(mouse_x, mouse_y, board_origin_x, board_origin_y);
-if (_mouse_grid.column_index >= 0 && _mouse_grid.column_index < BOARD_COLUMNS
- && _mouse_grid.row_index    >= 0 && _mouse_grid.row_index    < BOARD_ROWS) {
-    hovered_column = _mouse_grid.column_index;
-    hovered_row    = _mouse_grid.row_index;
-} else {
-    hovered_column = -1;
-    hovered_row    = -1;
-}
-
+// O quadrante sob o mouse (hovered_column/row) e calculado no evento Step; aqui
+// so lemos para pintar o destaque.
 for (var _row_index = 0; _row_index < BOARD_ROWS; _row_index++) {
     for (var _column_index = 0; _column_index < BOARD_COLUMNS; _column_index++) {
         var _quadrante = quadrantes[_row_index][_column_index];
