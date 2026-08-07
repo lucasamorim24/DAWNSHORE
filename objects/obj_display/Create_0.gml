@@ -5,6 +5,11 @@
 /// deixa uns pixels maiores que outros (o efeito "estourado"), entao travamos no
 /// maior inteiro que cabe no monitor. Quando for pra mobile, a adaptacao mora aqui.
 
+// Semeia o gerador aleatorio uma vez no boot, para que a fase da agua (e futuras
+// randomizacoes, ex.: Mare) variem a cada execucao. Sem isto, irandom repete a
+// mesma sequencia todo run.
+randomize();
+
 // Nada de suavizar textura/superficie ao escalar: mantem os pixels crocantes.
 gpu_set_tex_filter(false);
 

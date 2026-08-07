@@ -3,13 +3,20 @@
 /// (proporcao 16:9, estilo Papers Please) que sobe por escala INTEIRA para telas
 /// grandes. Um segundo momento (mobile) muda praticamente so estes numeros.
 ///
-/// Escala perfeita a partir de 480x270:  x2 = 960x540,  x3 = 1440x810,  x4 = 1920x1080.
+/// Base 320x180 (classico pixel art 16:9). Escala perfeita: x4 = 1280x720,
+/// x5 = 1600x900, x6 = 1920x1080. Base MENOR = tabuleiro/arte MAIORES na tela (o
+/// tabuleiro tem ~128px, entao ocupa mais da tela quanto menor for a base). Para
+/// deixar maior/menor, mexa SO em GAME_WIDTH/GAME_HEIGHT mantendo 16:9 (ex.: 256x144
+/// deixa tudo ainda maior; 384x216, menor). NAO escalar sprites: isso quebra o
+/// pixel-perfect - o zoom vem daqui + da escala inteira em obj_display.
 
-#macro GAME_WIDTH  480 // largura da resolucao base, em pixels de jogo
-#macro GAME_HEIGHT 270 // altura  da resolucao base, em pixels de jogo (16:9)
+#macro GAME_WIDTH  320 // largura da resolucao base, em pixels de jogo
+#macro GAME_HEIGHT 180 // altura  da resolucao base, em pixels de jogo (16:9)
 
-// Escala inicial da janela no desktop (janela = base * escala). x3 = 1440x810.
-#macro GAME_SCALE_INIT 3
+// Escala inicial da janela no desktop (janela = base * escala), limitada ao maior
+// inteiro que cabe no monitor (obj_display). x5 = 1600x900; cai pra x4 (1280x720)
+// em telas 1366x768.
+#macro GAME_SCALE_INIT 5
 
 // --- Layout de tela (faixas reservadas da HUD, em pixels de GUI) ---------------
 // Duas faixas horizontais de largura TOTAL reservam a HUD - topo e base - e a area
@@ -19,10 +26,10 @@
 // direito dessa faixa de topo.
 // FONTE DE VERDADE do layout: mexer aqui reposiciona tudo de uma vez (board, menu,
 // guias). Ao encolher/crescer uma faixa, o tabuleiro se recentraliza sozinho.
-#macro HUD_TOP_HEIGHT    40 // faixa superior (HUD, largura toda): esquerda + centro
+#macro HUD_TOP_HEIGHT    28 // faixa superior (HUD, largura toda): esquerda + centro
                             // (Mare) + direita (info do personagem etc.)
-#macro HUD_BOTTOM_HEIGHT 40 // faixa inferior (largura toda): reservada (a definir)
-#macro HUD_SIDE_MARGIN   12 // margens laterais da area de jogo (iguais nos dois lados)
+#macro HUD_BOTTOM_HEIGHT 28 // faixa inferior (largura toda): reservada (a definir)
+#macro HUD_SIDE_MARGIN   8  // margens laterais da area de jogo (iguais nos dois lados)
 
 // Liga/desliga os retangulos-guia das faixas reservadas (dev). Ligar so quando
 // precisar visualizar as areas; em jogo fica desligado (so a Mare aparece no topo).

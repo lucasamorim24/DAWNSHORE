@@ -16,9 +16,12 @@ vão **substituir só a renderização** — a lógica e o estado devem permanec
 Tabuleiro isométrico **4x4**, quadrantes rotulados estilo batalha naval:
 colunas `A–D`, linhas `1–4` (`A1` … `D4`).
 
-**Resolução base (definida em 2026-08-06):** pixel art **480×270** (16:9, estilo
-Papers Please), que sobe por **escala inteira** para telas grandes (×2=960×540,
-×3=1440×810, ×4=1920×1080). **Pixel-perfect:** interpolação desligada nas opções
+**Resolução base (ajustada em 2026-08-07):** pixel art **320×180** (16:9, estilo
+Papers Please), que sobe por **escala inteira** para telas grandes (×4=1280×720,
+×5=1600×900, ×6=1920×1080). Era 480×270; baixamos para **320×180** para o tabuleiro
+(≈128px, arte de tiles 32px) ocupar mais da tela — base menor = arte maior, sem
+esticar sprite (o que quebraria o pixel-perfect). Dial: só `GAME_WIDTH/GAME_HEIGHT`
+(16:9). **Pixel-perfect:** interpolação desligada nas opções
 (`option_windows_interpolate_pixels: false`) + `gpu_set_tex_filter(false)` +
 `obj_display` trava na maior escala **inteira** que cabe no monitor — escala
 fracionária é o que deixa o pixel "estourado" (uns pixels maiores que outros). Fonte de verdade em `scr_display_config` (macros
@@ -34,7 +37,8 @@ laterais iguais (macros em `scr_display_config`; `game_play_zone()` é a fonte d
 verdade). A faixa do **topo é a HUD** com três espaços: canto superior esquerdo,
 centro (marcador **Maré**) e canto superior direito (info do personagem etc.) —
 **não** existe painel vertical na direita. A **base** fica reservada (a definir).
-O tabuleiro é um **diorama compacto centralizado** nessa zona (tiles 64×32).
+O tabuleiro é um **diorama compacto centralizado** nessa zona (tiles com face de
+topo **32×16**, casando 1:1 com o tileset isométrico baixado).
 `DEBUG_LAYOUT` liga guias visuais das faixas enquanto o conteúdo real não existe.
 
 ---
@@ -61,14 +65,16 @@ antes de continuar.**
 ```
 scripts/
   scr_display_config   -> FONTE DE VERDADE do display E do layout:
-                          resolucao (GAME_WIDTH=480, GAME_HEIGHT=270, GAME_SCALE_INIT=3);
+                          resolucao (GAME_WIDTH=320, GAME_HEIGHT=180, GAME_SCALE_INIT=5);
                           faixas reservadas da HUD (HUD_TOP_HEIGHT=40,
                           HUD_BOTTOM_HEIGHT=40, HUD_SIDE_MARGIN=12) -> topo e base
                           de largura total + margens laterais iguais;
                           DEBUG_LAYOUT (guias dev); game_play_zone() -> retangulo
                           central onde o tabuleiro vive
-  scr_board_config     -> macros: BOARD_COLUMNS=4, BOARD_ROWS=4,
-                          TILE_WIDTH=64, TILE_HEIGHT=32
+  scr_board_config     -> macros: BOARD_COLUMNS=4, BOARD_ROWS=4;
+                          FACE DE TOPO do losango TILE_WIDTH=32, TILE_HEIGHT=16
+                          (casa 1:1 o tileset iso 32x32); TILE_SPRITE_SIZE=32,
+                          TILE_BLOCK_HEIGHT=8 (saia do bloco / elevacao futura)
   scr_grid_to_iso      -> grid_to_iso(col,row,ox,oy)  e  iso_to_grid(sx,sy,ox,oy)
                           (conversões grade <-> tela isométrica; inversas)
 
@@ -79,14 +85,21 @@ objects/
                   "estourado" da escala fracionária), centralizada.
     Draw_64    -> (Draw GUI) guias dev das faixas reservadas + contorno da zona de
                   jogo. Só quando DEBUG_LAYOUT (hoje false). Andaime visual.
-  obj_board
+  obj_board            (GERENTE da grade; nao desenha - nao tem mais evento Draw)
     Create_0   -> board_origin_x/y centralizam o tabuleiro na game_play_zone()
                   (zona central que sobra após as faixas da HUD); altura derivada
-                  do grid; column_letters, matriz `quadrantes[row][col]`,
-                  hovered_* (init -1)
+                  do grid; column_letters; CRIA as 16 instancias de obj_quadrante e
+                  guarda as referencias na matriz `quadrantes[row][col]`; hovered_*
+                  (init -1)
     Step_0     -> calcula o quadrante sob o mouse (hovered_column/row). LÓGICA.
-    Draw_0     -> desenha os 16 losangos + rótulos; pinta de verde o quadrante
-                  sob o mouse (lê hovered_*). SÓ RENDER.
+  obj_quadrante        (UMA instancia por casa; substituiu os structs anonimos)
+    Create_0   -> defaults da casa: column/row/label, iso_x/iso_y (= x/y, ancora no
+                  vertice de topo), esforco/resistencia/visibilidade (0, RESERVADAS),
+                  hovered, board, depth. O obj_board sobrescreve os reais no create.
+    Step_0     -> deriva o proprio `hovered` da fonte de verdade do board
+                  (hovered_column/row). LOGICA/reacoes futuras da casa.
+    Draw_0     -> desenha o proprio losango + rotulo; verde sob o mouse. SO RENDER.
+                  Vira draw_self() quando o sprite isometrico entrar.
   obj_mare
     Create_0   -> estado do cronometro: mare_duration_seconds (300),
                   mare_time_left, mare_cycles, mare_margin_top. LOGICA/ESTADO.
@@ -110,17 +123,25 @@ objects/
 
 ## 4. Estado guardado (sobrevive à troca por assets)
 
-**Tabuleiro** — `obj_board.quadrantes[row][col]`, cada quadrante é um struct:
+**Tabuleiro** — `obj_board.quadrantes[row][col]` guarda a **instância de
+`obj_quadrante`** daquela casa (antes era um struct anônimo; a API de leitura é a
+mesma, ex.: `board.quadrantes[r][c].label`). Cada casa é um objeto, com estas
+variáveis de instância:
 ```
-{
-  column_index, row_index,
-  label,                    // "A1" … "D4"
-  iso_x, iso_y,             // vértice de topo do losango na tela
-  esforco: 0,               // \
-  resistencia: 0,           //  > RESERVADOS: serão populados depois pela
-  visibilidade: 0           // /  re-randomização via "Maré" (etapa futura)
-}
+column_index, row_index,
+label,                    // "A1" … "D4"
+iso_x, iso_y,             // = x/y da instância; vértice de topo do losango na tela
+hovered,                  // derivado no Step do board (hovered_column/row)
+board,                    // referência ao obj_board (origem do grid + hover)
+depth,                    // ordem isométrica (frente por cima); sempre atrás do player
+esforco: 0,               // \
+resistencia: 0,           //  > RESERVADOS: serão populados depois pela
+visibilidade: 0           // /  re-randomização via "Maré" (etapa futura)
 ```
+Ser objeto (e não struct) é de propósito: além de receber o **sprite isométrico**,
+cada casa tem eventos próprios (Step/Alarm/Mouse/colisão) e pode ser referenciada/
+alvejada por outros objetos e pela mecânica da Maré. A Maré vai iterar as instâncias
+de `obj_quadrante` (ou a matriz) e popular `esforco/resistencia/visibilidade`.
 
 **Jogador** — `obj_player`: `column_index`, `row_index`, `label` (posição em
 grade, não pixel). `place_on_tile(col,row)` é o único ponto que altera a posição.
@@ -139,10 +160,25 @@ a regra de alcance aqui reflete em todo lugar.
 
 ## 5. O que já está implementado
 
-- **Resolução base 480×270** (pixel art, 16:9) com escala inteira via `obj_display`
-  + `scr_display_config`. Tabuleiro centralizado (horizontal no meio, ancorado ao
-  rodapé com folga no topo pro HUD). HUD/menus na camada GUI.
+- **Resolução base 320×180** (pixel art, 16:9) com escala inteira via `obj_display`
+  + `scr_display_config`. Tabuleiro centralizado na zona de jogo. HUD/menus na
+  camada GUI. Faixas HUD 28/28, margem lateral 8.
+- **Render dos tiles**: `obj_quadrante` sabe desenhar de dois jeitos — se tiver
+  sprite, via `draw_sprite` com âncora no vértice de topo (offset no Draw, origem do
+  sprite pode ser (0,0)); **sem sprite, cai no losango-primitiva com o rótulo A1–D4**.
+  Hover verde por cima nos dois. HOJE o `obj_quadrante` está **sem sprite** (spriteId
+  null) → mostra os losangos rotulados. A arte de água foi destacada de propósito
+  (não ficou boa ainda); ver pendências.
+- **Água animada** (`spr_water`, PRONTA mas DESTACADA): sprite de 10 quadros (tiles
+  104–113, 8 fps) já montado no projeto, hoje **não atribuído** ao `obj_quadrante`.
+  A dessincronização já está codada no Create (`image_index` aleatório + `image_speed`
+  ±15%, com `randomize()` no boot do `obj_display`) e ativa sozinha para qualquer
+  sprite animado (>1 quadro). Para religar a água: `obj_quadrante.spriteId = spr_water`.
 - Grid isométrico 4x4 estático com rótulos A1–D4.
+- **Quadrantes como objetos** (`obj_quadrante`): cada casa é uma instância própria
+  (estado + eventos), criada pelo `obj_board`, pronta para receber o sprite
+  isométrico e interagir mecanicamente com outros objetos / a Maré. Cada casa se
+  desenha e deriva seu próprio hover; o `obj_board` virou o gerente da grade.
 - Movimento do jogador clicando em quadrantes.
 - Cubo isométrico ocupando 1 quadrante, com rótulo na face de topo.
 - Destaque da **cruz** (quadrantes alcançáveis) em amarelo.
@@ -166,13 +202,21 @@ a regra de alcance aqui reflete em todo lugar.
       a cada 5 min. Falta o efeito: popular `esforco/resistencia/visibilidade` de
       cada quadrante dentro de intervalos pré-definidos. Lugar natural: um script
       chamado do gancho no `obj_mare/Step_0.gml` (onde `mare_cycles++`).
-- [ ] **Assets**: substituir as primitivas por pixel art / sprites / animações
-      (reescreve só os eventos Draw; o estado permanece).
+- [ ] **Assets do tabuleiro**: tileset isométrico em `D:\GAME DEV\isometric tileset`
+      (115 tiles 32×32 + `spritesheet.png` 352×352, grade 11×11). Board dimensionado
+      1:1 (face 32×16, bloco 8px) e o render por sprite **já ligado**. HOJE todas as
+      casas usam `spr_water` (água animada, tiles 104–113). Referência do tileset:
+      tile 103 = água funda (estática); 104–113 = água animada. Falta: importar os
+      demais terrenos (grama, terra etc.) e atribuir **variedade por casa** — mapa de
+      terreno fixo ou **sorteado pela Maré** (definir `sprite_index` de cada
+      `obj_quadrante`, provavelmente no gancho do `obj_mare`). Ao dar sprite animado a
+      uma casa, a dessincronização já acontece sozinha (Create). Cubo do jogador e
+      marcador seguem o mesmo caminho depois.
 - [ ] **Fonte de pixel art**: hoje o texto usa a fonte padrão (só ASCII), por isso
       "MARE" sem acento. Criar uma fonte (com acentos) e trocar os `draw_text` —
       "Maré" volta a ter acento. Entra junto com os demais assets.
 - [ ] **Escala com aspecto travado / fullscreen / mobile**: `obj_display` hoje só
-      define a janela inicial (base×3) e o GUI. Falta tratar resize/fullscreen
+      define a janela inicial (base×escala) e o GUI. Falta tratar resize/fullscreen
       mantendo 16:9 (letterbox) e a adaptação pra mobile — tudo concentrado nesse
       controlador.
 - [ ] **Otimização futura (se escalar)**: `get_reachable_tiles()` recria a lista

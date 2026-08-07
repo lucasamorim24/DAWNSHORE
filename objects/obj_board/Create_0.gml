@@ -30,7 +30,11 @@ hovered_row    = -1;
 // Letras das colunas, secao 2: "colunas = letras, linhas = numeros" (estilo batalha naval)
 column_letters = ["A", "B", "C", "D"];
 
-// Matriz [row_index][column_index] com os dados de cada um dos 16 quadrantes
+// Matriz [row_index][column_index] com as INSTANCIAS de obj_quadrante (antes eram
+// structs anonimos). O obj_board e o GERENTE da grade: cria as 16 casas como
+// objetos, guarda aqui as referencias e centraliza origem + hover. Cada casa
+// (obj_quadrante) passa a ter estado e eventos proprios, pronta para receber sprite
+// e interagir mecanicamente com outros objetos e com a "Mare".
 quadrantes = array_create(BOARD_ROWS);
 
 for (var _row_index = 0; _row_index < BOARD_ROWS; _row_index++) {
@@ -39,21 +43,27 @@ for (var _row_index = 0; _row_index < BOARD_ROWS; _row_index++) {
     for (var _column_index = 0; _column_index < BOARD_COLUMNS; _column_index++) {
         var _iso_position = grid_to_iso(_column_index, _row_index, board_origin_x, board_origin_y);
 
-        var _quadrante = {
-            column_index: _column_index,
-            row_index:    _row_index,
-            label:        column_letters[_column_index] + string(_row_index + 1), // ex: "A1", "D4"
-            iso_x:        _iso_position.x,
-            iso_y:        _iso_position.y,
+        // Cria a casa como instancia na MESMA camada do tabuleiro, ancorada no
+        // vertice de topo do losango (x/y da instancia). A ordem de desenho e por
+        // depth (definido abaixo), nao pela ordem deste loop.
+        var _q = instance_create_layer(_iso_position.x, _iso_position.y, layer, obj_quadrante);
 
-            // Propriedades do quadrante (secao 2 e 6). Ficam zeradas por enquanto -
-            // a re-randomizacao via Mare (secao 6) e quem vai popular esses valores
-            // dentro dos intervalos pre-estabelecidos. Isso entra numa proxima etapa.
-            esforco:      0,
-            resistencia:  0,
-            visibilidade: 0
-        };
+        _q.board        = id;
+        _q.column_index = _column_index;
+        _q.row_index    = _row_index;
+        _q.label        = column_letters[_column_index] + string(_row_index + 1); // ex: "A1", "D4"
+        _q.iso_x        = _iso_position.x;
+        _q.iso_y        = _iso_position.y;
 
-        quadrantes[_row_index][_column_index] = _quadrante;
+        // Ordem isometrica: casas "da frente" (maior column+row) desenham por cima
+        // das "de tras"; todas ficam atras do jogador (obj_player.depth = -100).
+        // Irrelevante para tiles planos, mas ja deixa a ocultacao correta para
+        // quando os sprites tiverem altura/elevacao (escalonavel, nao descartavel).
+        _q.depth = 100 - (_column_index + _row_index);
+
+        // Propriedades esforco/resistencia/visibilidade nascem zeradas no Create do
+        // obj_quadrante; a Mare (secao 6) as populara numa proxima etapa.
+
+        quadrantes[_row_index][_column_index] = _q;
     }
 }
