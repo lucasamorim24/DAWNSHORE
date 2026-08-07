@@ -105,6 +105,14 @@ menu_button_rect = function(_index) {
     return { x1: _x1, y1: _y1, x2: _x2, y2: _y2 };
 };
 
+// --- Cartas escolhidas na pescaria (propriedades guardadas SEPARADAMENTE) ---
+// Preenchidas pelo obj_pescaria ao fim de cada fase, no formato
+// { nome, prop_label, stat, delta }. undefined = ainda nao pescou. Ficam aqui como
+// fonte de verdade do bonus/penalidade do jogador; a aplicacao na mecanica
+// (esforco/resistencia/visibilidade) e um gancho para uma proxima etapa.
+carta_sorte = undefined;
+carta_reves = undefined;
+
 // Posiciona no quadrante inicial (A1).
 if (board != noone) {
     place_on_tile(column_index, row_index);

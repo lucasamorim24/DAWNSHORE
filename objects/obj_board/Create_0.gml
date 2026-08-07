@@ -67,3 +67,8 @@ for (var _row_index = 0; _row_index < BOARD_ROWS; _row_index++) {
         quadrantes[_row_index][_column_index] = _q;
     }
 }
+
+// Sorteio inicial: com as 16 casas ja criadas, populamos suas propriedades pela
+// mesma regra da Mare para o tabuleiro nunca abrir zerado. Dai em diante, quem
+// re-sorteia e o obj_mare a cada virada do cronometro (mesmo script).
+scr_mare_randomize();

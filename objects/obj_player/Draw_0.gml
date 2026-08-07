@@ -94,7 +94,7 @@ draw_line_color(_bb_x, _bb_y, _br_x, _br_y, outline_color, outline_color); // ba
 draw_set_halign(fa_center);
 draw_set_valign(fa_middle);
 draw_set_color(c_white);
-draw_text(_iso.x, _iso.y + TILE_HEIGHT / 2 - _h, label);
+draw_text_transformed(_iso.x, _iso.y + TILE_HEIGHT / 2 - _h, label, UI_TEXT_SCALE, UI_TEXT_SCALE, 0);
 draw_set_halign(fa_left);
 draw_set_valign(fa_top);
 draw_set_alpha(1); // restaura o alpha para nao afetar desenhos seguintes

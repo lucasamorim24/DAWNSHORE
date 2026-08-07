@@ -4,6 +4,10 @@
 
 if (board == noone) exit;
 
+// Sessao de cartas (pescaria) ativa: o tabuleiro nao interage - o clique pertence
+// as cartas (que tratam o proprio clique em coordenadas de GUI).
+if (instance_exists(obj_pescaria)) exit;
+
 // --- Janela de acao aberta: o clique interage com ela ---
 // A janela e um overlay na camada GUI, entao o teste de clique usa o mouse em
 // coordenadas de GUI (nao as coordenadas de mundo mouse_x/mouse_y).
@@ -18,7 +22,10 @@ if (menu_open) {
         // Movimentar: vai para o quadrante alvo e fecha a janela.
         place_on_tile(menu_target_col, menu_target_row);
     } else if (point_in_rectangle(_gmx, _gmy, _pe.x1, _pe.y1, _pe.x2, _pe.y2)) {
-        // Pescar: acao a implementar numa proxima etapa; por ora so fecha a janela.
+        // Pescar: abre a sessao de cartas (obj_pescaria) como overlay. Ela cuida das
+        // duas fases (sorte -> reves) e some sozinha ao terminar. O depth definitivo
+        // e ajustado no Create do controlador.
+        if (!instance_exists(obj_pescaria)) instance_create_depth(0, 0, 0, obj_pescaria);
     }
     // Qualquer clique (nos botoes ou fora) fecha a janela.
     menu_open = false;

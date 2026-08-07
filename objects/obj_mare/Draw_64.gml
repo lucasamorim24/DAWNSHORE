@@ -25,8 +25,8 @@ draw_set_valign(fa_top);
 // para garantir contraste sobre o tabuleiro. Dimensionado pelo texto.
 var _pad_x  = 5;
 var _pad_y  = 2;
-var _text_w = string_width(_text);
-var _text_h = string_height(_text);
+var _text_w = string_width(_text) * UI_TEXT_SCALE;
+var _text_h = string_height(_text) * UI_TEXT_SCALE;
 
 draw_set_alpha(0.45);
 draw_set_color(c_black);
@@ -36,7 +36,7 @@ draw_set_alpha(1);
 
 // Texto do marcador (nome + cronometro na mesma linha), centralizado no bloco.
 draw_set_color(c_white);
-draw_text(_center_x, _top + _pad_y, _text);
+draw_text_transformed(_center_x, _top + _pad_y, _text, UI_TEXT_SCALE, UI_TEXT_SCALE, 0);
 
 // Restaura os padroes de desenho para nao vazar estado para outros objetos.
 draw_set_halign(fa_left);

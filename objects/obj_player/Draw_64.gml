@@ -22,7 +22,7 @@ draw_set_halign(fa_center);
 draw_set_valign(fa_middle);
 draw_set_color(c_white);
 var _target_label = board.quadrantes[menu_target_row][menu_target_col].label;
-draw_text(menu_x + menu_w / 2, menu_y + menu_pad + menu_title_h / 2, _target_label);
+draw_text_transformed(menu_x + menu_w / 2, menu_y + menu_pad + menu_title_h / 2, _target_label, UI_TEXT_SCALE, UI_TEXT_SCALE, 0);
 
 // Dois botoes: 0 = Movimentar, 1 = Pescar. Realca o que esta sob o mouse.
 var _labels = ["Movimentar", "Pescar"];
@@ -36,7 +36,7 @@ for (var _b = 0; _b < 2; _b++) {
     draw_rectangle(_r.x1, _r.y1, _r.x2, _r.y2, true);
 
     draw_set_color(_hot ? c_black : c_white);
-    draw_text((_r.x1 + _r.x2) / 2, (_r.y1 + _r.y2) / 2, _labels[_b]);
+    draw_text_transformed((_r.x1 + _r.x2) / 2, (_r.y1 + _r.y2) / 2, _labels[_b], UI_TEXT_SCALE, UI_TEXT_SCALE, 0);
 }
 
 // Restaura os padroes de desenho.

@@ -18,3 +18,11 @@
 // TILE_BLOCK_HEIGHT fica reservado para empilhamento/elevacao e ajuste de ordem.
 #macro TILE_SPRITE_SIZE  32  // canvas quadrado de cada tile do tileset (px)
 #macro TILE_BLOCK_HEIGHT 8   // espessura visivel do bloco sob a face de topo (px)
+
+// --- Intervalo das propriedades sorteadas pela "Mare" ---
+// A cada virada da Mare (obj_mare), cada quadrante recebe novos valores de
+// esforco/resistencia/visibilidade sorteados neste intervalo (inclusivo nas duas
+// pontas). Fonte de verdade unica: mexa aqui para reequilibrar o jogo sem tocar na
+// logica do sorteio (scr_mare_randomize) nem na Mare.
+#macro MARE_PROP_MIN -3
+#macro MARE_PROP_MAX  3

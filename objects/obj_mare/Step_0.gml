@@ -6,9 +6,10 @@
 mare_time_left -= delta_time / 1000000;
 
 if (mare_time_left <= 0) {
-    // GANCHO DA "MARE": aqui entra a re-randomizacao de
-    // esforco/resistencia/visibilidade dos quadrantes (KICKOFF secao 6).
-    // Chamar o script da mare a partir daqui quando existir.
+    // GANCHO DA "MARE": re-randomiza esforco/resistencia/visibilidade de todos os
+    // quadrantes (KICKOFF secao 6). O script so mexe no ESTADO; o Draw das casas le
+    // os novos valores no frame seguinte.
+    scr_mare_randomize();
     mare_cycles++;
 
     // Recomeca o ciclo somando a duracao (em vez de resetar) para nao perder

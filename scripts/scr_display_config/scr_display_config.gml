@@ -35,6 +35,15 @@
 // precisar visualizar as areas; em jogo fica desligado (so a Mare aparece no topo).
 #macro DEBUG_LAYOUT false
 
+// --- Tamanho unico de texto da interface ---------------------------------------
+// A fonte padrao do GameMaker e grande demais para a resolucao base (320x180): um
+// caractere cheio "come" o tabuleiro. Todos os textos (label do quadrante, Mare,
+// menu de acao, tooltip de propriedades) desenham por draw_text_transformed com
+// ESTE fator, entao ficam do mesmo tamanho da leitura da grade. Fonte de verdade
+// unica: mexa aqui para escalar toda a tipografia de uma vez. 1 = fonte cheia.
+// Some quando entrar uma fonte de pixel art propria no tamanho certo.
+#macro UI_TEXT_SCALE 0.7
+
 /// Retorna a "zona de jogo": o retangulo central onde o tabuleiro vive, ja
 /// descontando as faixas reservadas da HUD (topo, base e margens laterais).
 /// Coordenadas de GUI (= resolucao base). Consumido pelo board (centralizacao),

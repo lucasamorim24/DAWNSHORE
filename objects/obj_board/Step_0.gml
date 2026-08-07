@@ -4,6 +4,14 @@
 /// o quadrante sob o cursor, mas e o lugar natural para futuras regras de turno,
 /// re-randomizacao das propriedades (Mare), etc.
 
+// Sessao de cartas (pescaria) ativa: congela o hover do tabuleiro para nao pintar
+// destaque verde/tooltip por baixo do overlay nem deixar o cubo translucido.
+if (instance_exists(obj_pescaria)) {
+    hovered_column = -1;
+    hovered_row    = -1;
+    exit;
+}
+
 // Descobre qual quadrante esta sob o mouse neste frame. Fica -1/-1 quando o
 // cursor esta fora do tabuleiro 4x4. E lido pelo obj_board (Draw, para o
 // destaque verde) e pelo obj_player (Draw, para a transparencia do cubo).

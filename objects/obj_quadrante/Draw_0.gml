@@ -51,11 +51,9 @@ if (sprite_index != -1) {
 // Rotulo do quadrante (ex: "A1"). No modo losango (sem sprite) sempre aparece -
 // e a leitura da grade. Com sprite, so em DEBUG_LAYOUT (pra nao poluir a arte).
 if (sprite_index == -1 || DEBUG_LAYOUT) {
-    // <<< TAMANHO DA LETRA/NUMERO AQUI >>> menor = mais pequeno. 1 = fonte cheia.
-    // A fonte ainda e a padrao do GameMaker (so ASCII); o texto e reduzido por
-    // escala. Quando entrar uma fonte de pixel art propria, troca-se por ela e este
-    // fator some. 0.5 = metade do tamanho original.
-    var _label_scale = 0.7;
+    // Tamanho unico da tipografia da interface (scr_display_config). Toda a UI usa
+    // este mesmo fator, entao a leitura da grade e o resto do texto batem.
+    var _label_scale = UI_TEXT_SCALE;
 
     draw_set_halign(fa_center);
     draw_set_valign(fa_middle);

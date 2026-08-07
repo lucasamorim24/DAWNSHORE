@@ -39,8 +39,8 @@ draw_rectangle(_zone.x1, _zone.y1, _zone.x2 - 1, _zone.y2 - 1, true);
 draw_set_halign(fa_left);
 draw_set_valign(fa_top);
 draw_set_color(c_white);
-draw_text(2, 2, "HUD ESQ");
-draw_text(GAME_WIDTH * 2 / 3 + 2, 2, "HUD DIR");
-draw_text(2, GAME_HEIGHT - HUD_BOTTOM_HEIGHT + 2, "BASE");
+draw_text_transformed(2, 2, "HUD ESQ", UI_TEXT_SCALE, UI_TEXT_SCALE, 0);
+draw_text_transformed(GAME_WIDTH * 2 / 3 + 2, 2, "HUD DIR", UI_TEXT_SCALE, UI_TEXT_SCALE, 0);
+draw_text_transformed(2, GAME_HEIGHT - HUD_BOTTOM_HEIGHT + 2, "BASE", UI_TEXT_SCALE, UI_TEXT_SCALE, 0);
 
 draw_set_color(c_white);
