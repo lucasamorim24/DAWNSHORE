@@ -4,9 +4,12 @@
 /// o quadrante sob o cursor, mas e o lugar natural para futuras regras de turno,
 /// re-randomizacao das propriedades (Mare), etc.
 
-// Sessao de cartas (pescaria) ativa: congela o hover do tabuleiro para nao pintar
-// destaque verde/tooltip por baixo do overlay nem deixar o cubo translucido.
-if (instance_exists(obj_pescaria)) {
+// Hover so vale quando o jogador navega LIVRE pelo tabuleiro (sem nada aberto). Ele
+// CONGELA se houver algo por cima esperando decisao: a janelinha de acao
+// (Movimentar/Pescar) aberta ou a sessao de cartas (pescaria) ativa. Assim nao pinta
+// destaque verde/tooltip nem deixa o cubo translucido enquanto um menu esta no ar.
+var _menu_aberto = instance_exists(obj_player) && obj_player.menu_open;
+if (_menu_aberto || instance_exists(obj_pescaria)) {
     hovered_column = -1;
     hovered_row    = -1;
     exit;

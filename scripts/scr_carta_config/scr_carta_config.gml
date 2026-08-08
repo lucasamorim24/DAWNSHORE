@@ -27,11 +27,25 @@
 
 // --- Camadas de desenho (Draw GUI: MAIOR depth desenha ANTES = mais ao fundo) ----
 // Overlay cobre a Mare (depth 0) e o tabuleiro; as cartas ficam por cima do overlay.
+// A carta "Propriedades do Mar" fica ACIMA das duas (depth menor) para parar na
+// frente delas.
 #macro CARD_OVERLAY_DEPTH -50
 #macro CARD_DEPTH         -100
+#macro CARD_MAR_DEPTH     -110
 
 // --- Overlay (escurecimento de fundo) -------------------------------------------
 #macro CARD_OVERLAY_ALPHA 0.72
+
+// --- Carta "Propriedades do Mar" (informativa, nao selecionavel) ----------------
+// So aparece ao FINAL (depois de escolher sorte e reves): cresce de dentro do
+// quadrante clicado e enfileira como a 3a miniatura no canto, imprimindo os
+// atributos daquele quadrante no ciclo atual da Mare.
+#macro CARD_MAR_GROW_SPEED  0.05 // ~20 frames para crescer do quadrante ate o canto
+
+// --- Cores das propriedades (fonte de verdade unica; ver carta_prop_color) ------
+#macro CARD_COL_GOOD    make_colour_rgb(30, 140, 60)    // bonus (verde)
+#macro CARD_COL_BAD     make_colour_rgb(200, 55, 55)    // penalidade (vermelho)
+#macro CARD_COL_NEUTRAL make_colour_rgb(150, 155, 170)  // valor zero (neutro)
 
 /// Baralho de uma fase. Cada carta: nome exibido (ASCII), rotulo da propriedade
 /// (ASCII), a chave do atributo afetado e o delta. stat/delta ficam prontos para,
@@ -71,17 +85,46 @@ function carta_home_pos(_slot) {
 }
 
 /// Posicao-alvo (centro) da MINIATURA no canto da tela, por tipo. Canto inferior
-/// esquerdo (dentro da faixa reservada da HUD): sorte a esquerda, reves ao lado.
-/// @param {string} _tipo  "sorte" ou "reves"
+/// esquerdo (dentro da faixa reservada da HUD), enfileiradas: sorte, reves e mar.
+/// @param {string} _tipo  "sorte" | "reves" | "mar"
 /// @returns {struct} { x, y } centro em coordenadas de GUI
 function carta_corner_pos(_tipo) {
     var _tw     = CARD_W * CARD_THUMB_SCALE;
     var _th     = CARD_H * CARD_THUMB_SCALE;
     var _margin = 5;
+    var _gap    = 4;
+
+    var _slot = 2; // mar = 3o (padrao)
+    if      (_tipo == "sorte") _slot = 0;
+    else if (_tipo == "reves") _slot = 1;
+
     var _y      = GAME_HEIGHT - _margin - _th / 2;
-    var _x0     = _margin + _tw / 2;                 // centro do 1o slot (sorte)
-    var _x      = (_tipo == "sorte") ? _x0 : _x0 + _tw + 4;
+    var _x      = _margin + _tw / 2 + _slot * (_tw + _gap);
     return { x: _x, y: _y };
+}
+
+/// Diz se o efeito da carta e BOM para o jogador (verde) ou nao (vermelho). Nao
+/// basta o sinal do delta: em "esforco" MENOS e melhor (delta negativo = bonus),
+/// enquanto em "resistencia"/"visibilidade" MAIS e melhor (delta positivo = bonus).
+/// Fonte de verdade unica dessa regra: consumida pelo render (cor da propriedade) e
+/// pronta para a aplicacao do efeito na mecanica numa proxima etapa.
+/// @param {string} _stat   "esforco" | "resistencia" | "visibilidade"
+/// @param {real}   _delta  variacao da propriedade (ex: +2, -2)
+/// @returns {bool} true = bonus (verde); false = penalidade (vermelho)
+function carta_is_bonus(_stat, _delta) {
+    if (_stat == "esforco") return (_delta < 0); // menos esforco = melhor
+    return (_delta > 0);                         // mais resistencia/visibilidade = melhor
+}
+
+/// Cor de um valor de propriedade: verde se e bonus, vermelho se e penalidade,
+/// neutro se e zero. Fonte de verdade unica das cores; usada tanto pela propriedade
+/// unica das cartas de escolha quanto pelas 3 linhas da carta "Propriedades do Mar".
+/// @param {string} _stat   "esforco" | "resistencia" | "visibilidade"
+/// @param {real}   _value  valor/variacao
+/// @returns {constant.Colour}
+function carta_prop_color(_stat, _value) {
+    if (_value == 0) return CARD_COL_NEUTRAL;
+    return carta_is_bonus(_stat, _value) ? CARD_COL_GOOD : CARD_COL_BAD;
 }
 
 /// Suavizacao (smootherstep) para o deslize ate o canto comecar/terminar macio.

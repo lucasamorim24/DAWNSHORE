@@ -24,8 +24,14 @@ if (menu_open) {
     } else if (point_in_rectangle(_gmx, _gmy, _pe.x1, _pe.y1, _pe.x2, _pe.y2)) {
         // Pescar: abre a sessao de cartas (obj_pescaria) como overlay. Ela cuida das
         // duas fases (sorte -> reves) e some sozinha ao terminar. O depth definitivo
-        // e ajustado no Create do controlador.
-        if (!instance_exists(obj_pescaria)) instance_create_depth(0, 0, 0, obj_pescaria);
+        // e ajustado no Create do controlador. Passa o quadrante clicado (alvo da
+        // pescaria): e de onde a carta "Propriedades do Mar" brota e de onde ela le
+        // os atributos exibidos.
+        if (!instance_exists(obj_pescaria)) {
+            var _p = instance_create_depth(0, 0, 0, obj_pescaria);
+            _p.target_col = menu_target_col;
+            _p.target_row = menu_target_row;
+        }
     }
     // Qualquer clique (nos botoes ou fora) fecha a janela.
     menu_open = false;

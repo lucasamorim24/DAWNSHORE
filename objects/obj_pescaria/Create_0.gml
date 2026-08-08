@@ -10,11 +10,22 @@
 // Limpa miniaturas de uma pescaria anterior, para comecar sempre do zero.
 with (obj_carta_sorte) instance_destroy();
 with (obj_carta_reves) instance_destroy();
+with (obj_carta_mar)   instance_destroy();
 
 // Overlay por cima da Mare e do tabuleiro, mas atras das cartas (ver macros).
 depth = CARD_OVERLAY_DEPTH;
 
-// Fase atual da sessao: "sorte" primeiro, depois "reves".
+// Quadrante clicado para pescar (o obj_player preenche logo apos criar esta
+// instancia). E a origem da carta "Propriedades do Mar" e a fonte dos atributos
+// exibidos nela.
+target_col = -1;
+target_row = -1;
+
+// Carta "Propriedades do Mar": criada so ao FINAL (fase "mar"), depois de escolher
+// sorte e reves. Guardamos a referencia para saber quando ela assentou no canto.
+mar_card = noone;
+
+// Fase atual da sessao: "sorte" -> "reves" -> "mar" (encerramento).
 fase = "sorte";
 
 // Handshake com as cartas: a carta clicada se registra aqui (fonte de verdade de

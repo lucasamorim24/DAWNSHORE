@@ -35,6 +35,7 @@
   "name":"DAWNSHORE",
   "resources":[
     {"id":{"name":"obj_board","path":"objects/obj_board/obj_board.yy",},},
+    {"id":{"name":"obj_carta_mar","path":"objects/obj_carta_mar/obj_carta_mar.yy",},},
     {"id":{"name":"obj_carta_reves","path":"objects/obj_carta_reves/obj_carta_reves.yy",},},
     {"id":{"name":"obj_carta_sorte","path":"objects/obj_carta_sorte/obj_carta_sorte.yy",},},
     {"id":{"name":"obj_display","path":"objects/obj_display/obj_display.yy",},},

@@ -3,6 +3,11 @@
 /// As cartas se desenham por conta propria (Draw GUI), com depth menor, POR CIMA
 /// deste overlay. Coordenadas de GUI (resolucao base), como o resto da HUD.
 
+// Fase de encerramento ("mar"): tira o overlay/titulo para a carta "Propriedades do
+// Mar" surgir sobre o tabuleiro e assentar no canto. As miniaturas se desenham
+// sozinhas (instancias de carta), independentes deste overlay.
+if (fase == "mar") exit;
+
 var _gw = display_get_gui_width();
 var _gh = display_get_gui_height();
 

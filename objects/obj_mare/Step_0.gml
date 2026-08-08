@@ -2,6 +2,11 @@
 /// Regride o cronometro em tempo real (independente do framerate) ate zero e
 /// reinicia, mantendo o marcador "sempre rodando". SO LOGICA.
 
+// Pescaria ativa: a Mare CONGELA. Enquanto o jogador navega pelas cartas (do clique
+// em "Pescar" ate a 3a carta - Propriedades do Mar - assentar e a sessao encerrar),
+// o cronometro nao corre; volta a contar so quando o obj_pescaria some.
+if (instance_exists(obj_pescaria)) exit;
+
 // delta_time vem em microssegundos; convertemos para segundos.
 mare_time_left -= delta_time / 1000000;
 
